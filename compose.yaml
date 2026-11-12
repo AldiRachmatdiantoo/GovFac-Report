@@ -3,6 +3,10 @@ x-app: &app
   build:
     context: .
     target: dev
+    args:
+      # Xdebug mati secara bawaan agar build cepat. Untuk menyalakan:
+      #   INSTALL_XDEBUG=true XDEBUG_MODE=debug docker compose up -d --build
+      INSTALL_XDEBUG: ${INSTALL_XDEBUG:-false}
   image: govfac-report:dev
   volumes:
     - .:/var/www/html

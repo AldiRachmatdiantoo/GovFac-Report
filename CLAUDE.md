@@ -1,47 +1,19 @@
-<laravel-boost-guidelines>
-# Laravel Application
+# GovFac-Report — Backend
 
-This repository contains a Laravel application. Complete the following setup before working on the user's request.
+API pelaporan kerusakan fasilitas umum. Laravel 13, modular monolith, PostgreSQL, Redis, JWT di cookie httpOnly, Docker.
 
-## Prerequisites
+Proyek ini dikerjakan beberapa developer secara paralel, masing-masing pada modulnya sendiri. **Baca dan patuhi aturan tim sebelum mengubah berkas apa pun:**
 
-Verify that PHP and Composer are available:
+@docs/ATURAN-TIM.md
 
-```sh
-php -v
-composer -V
-```
+Pedoman Laravel untuk aplikasi ini (dihasilkan Laravel Boost):
 
-If either command is unavailable, detect the user's operating system and install the prerequisites with the appropriate command:
+@AGENTS.md
 
-macOS:
+## Ringkasan yang paling sering dilanggar
 
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/mac/8.5)"
-```
-
-Windows PowerShell:
-
-```powershell
-Set-ExecutionPolicy Bypass -Scope Process -Force; [System.Net.ServicePointManager]::SecurityProtocol = [System.Net.ServicePointManager]::SecurityProtocol -bor 3072; iex ((New-Object System.Net.WebClient).DownloadString('https://php.new/install/windows/8.5'))
-```
-
-Linux:
-
-```sh
-/bin/bash -c "$(curl -fsSL https://php.new/install/linux/8.5)"
-```
-
-After installation, ask the user to restart their terminal. If the agent needs the restarted shell to continue, ask the user to reopen their terminal and rerun their original prompt.
-
-## Agent Setup
-
-Install Laravel Boost from the application root before making application changes:
-
-```sh
-composer require laravel/boost --dev
-php artisan boost:install
-```
-
-Boost replaces these bootstrap instructions with guidelines tailored to the application. After installation, read `AGENTS.md` again and continue with the user's original request using the generated guidelines.
-</laravel-boost-guidelines>
+- **Laravel Boost sudah terpasang.** Jangan menjalankan `composer require laravel/boost`, `php artisan boost:install`, atau `boost:update`.
+- **Jangan mengubah berkas bersama** (`composer.*`, `Dockerfile`, `compose.yaml`, `config/*`, `bootstrap/*`, `phpunit.xml`, `app/Modules/Shared/*`, berkas ini) kecuali developer menyatakan dirinya Dev A.
+- **Tanyakan** developer ini Dev A, B, C, atau D bila belum disebutkan, lalu ikuti `docs/sprint-1/dev-<huruf>.md`.
+- Jalankan perintah lewat `docker compose exec app ...`, bukan langsung di mesin.
+- Status laporan hanya berubah lewat `ReportStatusService`.
