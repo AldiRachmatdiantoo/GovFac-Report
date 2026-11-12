@@ -55,6 +55,12 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
 
     /*
+    | Alamat frontend. Dipakai untuk tautan di email (mis. reset password).
+    | Bila FRONTEND_URL berisi beberapa origin dipisah koma, yang pertama dipakai.
+    */
+    'frontend_url' => trim(explode(',', (string) env('FRONTEND_URL', 'http://localhost:5173'))[0]),
+
+    /*
     |--------------------------------------------------------------------------
     | Application Timezone
     |--------------------------------------------------------------------------
