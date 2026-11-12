@@ -26,7 +26,8 @@ Sambil menunggu fondasi, B, C, dan D bisa menyiapkan lingkungan (langkah "Persia
 - **`Routes/api.php`**: tiap dev menulis di blok miliknya sendiri yang diberi komentar nama PBI.
 - **Berkas bersama dimiliki Dev A**: `composer.json`, `composer.lock`, `config/*`, `.env.example`, `bootstrap/*`, `app/Modules/Shared/*`. Butuh perubahan di sana? Minta ke A atau buat PR kecil terpisah.
 - **Migration yang sudah di-merge tidak diedit.** Butuh kolom baru? Buat migration baru.
-- **Antar modul hanya lewat `Contracts/` atau event.** Jangan mengimpor Service, Repository, atau Model modul lain.
+- **Antar modul hanya lewat `Contracts/` atau event.** Jangan mengimpor Service, Repository, atau Model modul lain. Pengecualian: model `User` (modul Auth) dan `Report` (modul Report) boleh diimpor untuk relasi dan type hint, tetapi `reports.status` tetap hanya diubah lewat `ReportStatusService`.
+- **`role` pada `User` dan `status` pada `Report` tidak fillable.** Keduanya tidak bisa diisi lewat `create([...])` dari input request; set secara eksplisit di Service.
 - Tidak ada yang push langsung ke `main`.
 
 ## Lapisan (wajib sama di semua modul)
