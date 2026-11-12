@@ -32,15 +32,18 @@ RUN apk add --no-cache icu-libs libpq libzip libpng libjpeg-turbo freetype \
     && apk del .build-deps
 
 # ---------------------------------------------------------------------------
-# Stage 3: dev — Composer + Xdebug; kode di-mount sebagai volume oleh Compose
+# Stage 3: dev — Composer + Xdebug opsional; kode di-mount oleh Compose
 # ---------------------------------------------------------------------------
 FROM base AS dev
 
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer
-RUN apk add --no-cache --virtual .xdebug-deps $PHPIZE_DEPS linux-headers \
+ARG INSTALL_XDEBUG=false
+RUN if [ "$INSTALL_XDEBUG" = "true" ]; then \
+    apk add --no-cache --virtual .xdebug-deps $PHPIZE_DEPS linux-headers \
     && pecl install xdebug \
     && docker-php-ext-enable xdebug \
-    && apk del .xdebug-deps
+    && apk del .xdebug-deps; \
+    fi
 COPY docker/php/dev.ini /usr/local/etc/php/conf.d/zz-app.ini
 
 CMD ["php-fpm"]
