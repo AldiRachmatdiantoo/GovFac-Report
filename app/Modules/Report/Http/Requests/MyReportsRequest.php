@@ -3,6 +3,7 @@
 namespace App\Modules\Report\Http\Requests;
 
 use App\Modules\Shared\Enums\ReportStatus;
+use App\Modules\Shared\Support\Pagination;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
 
@@ -20,7 +21,7 @@ class MyReportsRequest extends FormRequest
     {
         return [
             'status' => ['sometimes', 'string', Rule::enum(ReportStatus::class)],
-            'per_page' => ['sometimes', 'integer', 'min:1', 'max:50'],
+            'per_page' => Pagination::rules(),
         ];
     }
 
@@ -31,6 +32,6 @@ class MyReportsRequest extends FormRequest
 
     public function perPage(): int
     {
-        return (int) $this->validated('per_page', 15);
+        return (int) $this->validated('per_page', Pagination::DEFAULT_PER_PAGE);
     }
 }

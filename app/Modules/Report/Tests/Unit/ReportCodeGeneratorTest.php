@@ -20,6 +20,16 @@ class ReportCodeGeneratorTest extends TestCase
         $this->assertCount(3, array_unique($codes));
     }
 
+    public function test_codes_keep_growing_past_six_digits(): void
+    {
+        $generator = new ReportCodeGenerator;
+        $date = new DateTimeImmutable('2026-11-12');
+
+        $this->assertSame('GFR-2026-1000000', $generator->generate(1000000, $date));
+        // Kolom reports.code selebar 20 karakter.
+        $this->assertLessThanOrEqual(20, strlen($generator->generate(99999999999, $date)));
+    }
+
     public function test_unpersisted_reports_are_rejected(): void
     {
         $this->expectException(InvalidArgumentException::class);

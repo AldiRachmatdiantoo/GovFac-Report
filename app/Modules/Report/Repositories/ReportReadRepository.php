@@ -4,6 +4,7 @@ namespace App\Modules\Report\Repositories;
 
 use App\Modules\Report\Models\Report;
 use App\Modules\Shared\Enums\ReportStatus;
+use App\Modules\Shared\Support\Pagination;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 /**
@@ -35,7 +36,7 @@ class ReportReadRepository
     /**
      * @return LengthAwarePaginator<int, Report>
      */
-    public function paginateByReporter(int $reporterId, ?ReportStatus $status = null, int $perPage = 15): LengthAwarePaginator
+    public function paginateByReporter(int $reporterId, ?ReportStatus $status = null, int $perPage = Pagination::DEFAULT_PER_PAGE): LengthAwarePaginator
     {
         return Report::query()
             ->with(['photos', 'tags'])

@@ -8,6 +8,7 @@ use App\Modules\Report\Models\ReportStatusHistory;
 use App\Modules\Report\Repositories\ReportReadRepository;
 use App\Modules\Report\Repositories\ReportStatusHistoryRepository;
 use App\Modules\Shared\Enums\ReportStatus;
+use App\Modules\Shared\Support\Pagination;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -22,7 +23,7 @@ class ReportQueryService
     /**
      * @return LengthAwarePaginator<int, Report>
      */
-    public function paginateMine(User $user, ?ReportStatus $status = null, int $perPage = 15): LengthAwarePaginator
+    public function paginateMine(User $user, ?ReportStatus $status = null, int $perPage = Pagination::DEFAULT_PER_PAGE): LengthAwarePaginator
     {
         return $this->reports->paginateByReporter($user->getKey(), $status, $perPage);
     }
