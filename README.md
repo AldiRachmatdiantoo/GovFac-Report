@@ -9,8 +9,22 @@ cp .env.example .env
 docker compose up -d --build
 docker compose exec app composer install
 docker compose exec app php artisan key:generate
+docker compose exec app php artisan jwt:secret
 docker compose exec app php artisan migrate
 ```
+
+## Autentikasi
+
+Sesi memakai JWT di cookie httpOnly; frontend tidak pernah memegang token.
+
+- `POST /auth/login` memasang cookie `access_token` (httpOnly) dan `XSRF-TOKEN` (bisa dibaca JavaScript).
+- Frontend mengirim setiap permintaan dengan `credentials: 'include'`.
+- Permintaan selain GET wajib membawa header `X-XSRF-TOKEN` berisi nilai cookie `XSRF-TOKEN`; tanpa itu dijawab `419`.
+- Access token berlaku 15 menit. Saat mendapat `401`, panggil `POST /auth/refresh` lalu ulangi permintaan. Sesi bisa diperpanjang sampai 7 hari sejak login.
+- Mengganti password mencabut semua sesi lama.
+- Origin frontend diatur lewat `FRONTEND_URL` di `.env` (dipakai CORS dan tautan email).
+
+Di route modul, pakai `->middleware('auth:api')` dan `->middleware('role:admin')`. Di tes, pakai `$this->actingAs($user, 'api')`.
 
 API tersedia di `http://localhost:8000/api/v1`. Cek kesehatan: `http://localhost:8000/up`.
 

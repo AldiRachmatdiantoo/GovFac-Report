@@ -1,5 +1,7 @@
 <?php
 
+use App\Modules\Auth\Http\Middleware\AuthenticateFromCookie;
+use App\Modules\Auth\Http\Middleware\VerifyXsrfHeader;
 use App\Modules\Shared\Http\Middleware\EnsureRole;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -13,6 +15,12 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
+        // Urutan penting: cookie dibaca dulu, baru guard `auth:api` berjalan.
+        $middleware->api(prepend: [
+            AuthenticateFromCookie::class,
+            VerifyXsrfHeader::class,
+        ]);
+
         $middleware->alias([
             'role' => EnsureRole::class,
         ]);
