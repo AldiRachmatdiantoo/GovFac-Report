@@ -18,6 +18,10 @@ x-app: &app
     CACHE_STORE: redis
     QUEUE_CONNECTION: redis
     SESSION_DRIVER: redis
+    # Log ke stderr (lihat dengan: docker compose logs -f app). Berkas log di volume
+    # dibuat oleh root saat `docker compose exec`, lalu tidak bisa ditulis php-fpm
+    # (www-data), sehingga setiap error berubah menjadi "Permission denied".
+    LOG_CHANNEL: stderr
   depends_on:
     postgres:
       condition: service_healthy
