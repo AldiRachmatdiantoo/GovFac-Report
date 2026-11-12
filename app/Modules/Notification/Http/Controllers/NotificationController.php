@@ -17,7 +17,7 @@ class NotificationController
     public function index(ListNotificationsRequest $request): AnonymousResourceCollection
     {
         return NotificationResource::collection(
-            $this->notifications->paginate($request->user(), $request->boolean('unread')),
+            $this->notifications->paginate($request->user(), $request->boolean('unread'), $request->perPage()),
         );
     }
 

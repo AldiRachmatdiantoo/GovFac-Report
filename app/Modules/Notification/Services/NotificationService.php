@@ -5,6 +5,7 @@ namespace App\Modules\Notification\Services;
 use App\Modules\Auth\Events\UserLoggedIn;
 use App\Modules\Notification\Notifications\LoginDetected;
 use App\Modules\Notification\Repositories\NotificationRepository;
+use App\Modules\Shared\Support\Pagination;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Model;
@@ -13,7 +14,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class NotificationService
 {
-    public const PER_PAGE = 20;
+    public const PER_PAGE = Pagination::DEFAULT_PER_PAGE;
 
     public function __construct(
         private readonly NotificationRepository $notifications,
@@ -36,9 +37,9 @@ class NotificationService
     /**
      * @return LengthAwarePaginator<int, DatabaseNotification>
      */
-    public function paginate(Model $user, bool $unreadOnly): LengthAwarePaginator
+    public function paginate(Model $user, bool $unreadOnly, int $perPage = self::PER_PAGE): LengthAwarePaginator
     {
-        return $this->notifications->paginateFor($user, $unreadOnly, self::PER_PAGE);
+        return $this->notifications->paginateFor($user, $unreadOnly, $perPage);
     }
 
     public function unreadCount(Model $user): int
