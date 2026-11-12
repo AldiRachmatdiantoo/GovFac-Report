@@ -37,7 +37,7 @@ Branch: `chore/fondasi`. Isinya hanya hal yang dipakai lebih dari satu dev. Tanp
    interface ReportStatusService
    {
        /** Catat status awal laporan baru (riwayat: null -> ai_validation). */
-       public function initialize(Report $report, ?User $actor): void;
+       public function initialize(Report $report, ?User $actor = null): void;
 
        /** Pindahkan status. Lempar InvalidStatusTransition bila tidak sah. */
        public function transition(
@@ -45,7 +45,7 @@ Branch: `chore/fondasi`. Isinya hanya hal yang dipakai lebih dari satu dev. Tanp
            ReportStatus $to,
            ?User $actor = null,
            ?string $note = null,
-           ?string $reasonCategory = null,
+           ?ReasonCategory $reasonCategory = null,
        ): Report;
    }
    ```
