@@ -116,9 +116,11 @@ class MyReportsTest extends TestCase
         $item = $response->json('data.0');
 
         $this->assertCount(1, $item['photos']);
-        $this->assertSame('photos/test.jpg', $item['photos'][0]['path']);
+        // Bentuk mengikuti ReportResource milik PBI-5 dan API contract:
+        // foto berupa {id, url} (path penyimpanan tidak dibuka), tagar berupa nama.
+        $this->assertArrayNotHasKey('path', $item['photos'][0]);
+        $this->assertStringContainsString('photos/test.jpg', $item['photos'][0]['url']);
 
-        $this->assertCount(1, $item['tags']);
-        $this->assertSame('jalan_rusak', $item['tags'][0]['name']);
+        $this->assertSame(['jalan_rusak'], $item['tags']);
     }
 }
