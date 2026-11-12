@@ -1,3 +1,13 @@
+# GovFac-Report — Backend
+
+Proyek ini dikerjakan beberapa developer secara paralel, masing-masing pada modulnya sendiri.
+**Sebelum mengubah berkas apa pun, baca dan patuhi `docs/ATURAN-TIM.md`.**
+
+- Laravel Boost sudah terpasang. Jangan menjalankan `composer require laravel/boost`, `php artisan boost:install`, atau `boost:update`.
+- Jangan mengubah berkas bersama (`composer.*`, `Dockerfile`, `compose.yaml`, `config/*`, `bootstrap/*`, `phpunit.xml`, `app/Modules/Shared/*`, `AGENTS.md`, `CLAUDE.md`) kecuali developer menyatakan dirinya Dev A.
+- Tanyakan developer ini Dev A, B, C, atau D bila belum disebutkan, lalu ikuti `docs/sprint-1/dev-<huruf>.md`.
+- Jalankan perintah lewat `docker compose exec app ...`.
+
 <laravel-boost-guidelines>
 === foundation rules ===
 
