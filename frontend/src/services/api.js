@@ -26,7 +26,12 @@ const toReport = (r, history = []) => ({
 const toMeta = m => ({ page: m.current_page, lastPage: m.last_page, total: m.total, perPage: m.per_page })
 
 // ---------- AUTH (PBI-1, PBI-2) ----------
-export const me = () => http.get('/auth/me').then(r => r.data.data)
+// Cookie XSRF-TOKEN dipasang bersama cookie sesi dan bisa dibaca JavaScript. Bila tidak ada,
+// pengunjung pasti belum login, jadi tidak perlu bertanya ke server (menghemat /auth/me dan /auth/refresh).
+const hasSessionCookie = () => document.cookie.split('; ').some(c => c.startsWith('XSRF-TOKEN='))
+export const me = () => (hasSessionCookie()
+  ? http.get('/auth/me').then(r => r.data.data)
+  : Promise.reject(Object.assign(new Error('Belum login.'), { status: 401, fields: {} })))
 export const login = (email, password) => http.post('/auth/login', { email, password }).then(r => ({ user: r.data.data.user }))
 // Registrasi tidak memasang cookie sesi, jadi dilanjutkan dengan login.
 export const register = async d => {

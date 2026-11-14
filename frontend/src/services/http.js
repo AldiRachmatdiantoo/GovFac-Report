@@ -6,7 +6,9 @@ import axios from 'axios'
 export const http = axios.create({
   baseURL: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000/api/v1',
   withCredentials: true,
-  withXSRFToken: true,
+  // Header XSRF hanya dikirim untuk permintaan yang mengubah data (backend memang hanya memeriksanya
+  // di situ). GET tanpa header khusus tidak memicu preflight CORS, jadi satu permintaan lebih hemat.
+  withXSRFToken: config => !['get', 'head', 'options'].includes((config.method || 'get').toLowerCase()),
   xsrfCookieName: 'XSRF-TOKEN',
   xsrfHeaderName: 'X-XSRF-TOKEN',
   headers: { Accept: 'application/json' },
