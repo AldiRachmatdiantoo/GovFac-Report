@@ -1,4 +1,8 @@
-# Lingkungan pengembangan lokal. Jalankan: docker compose up -d
+# Lingkungan pengembangan lokal. Jalankan dari folder backend/: docker compose up -d
+# `name` dikunci supaya nama kontainer dan volume (pgdata, redisdata) tidak ikut
+# berubah menjadi "backend" setelah berkas ini pindah ke folder backend/.
+name: govfac-report
+
 x-app: &app
   build:
     context: .
@@ -10,6 +14,10 @@ x-app: &app
   image: govfac-report:dev
   volumes:
     - .:/var/www/html
+    # vendor/ disimpan di volume Docker, bukan di folder proyek. Di Windows dan macOS,
+    # membaca ribuan berkas PHP lewat bind mount membuat tiap permintaan butuh beberapa
+    # detik. Isi volume ini dengan: docker compose exec app composer install
+    - vendor:/var/www/html/vendor
   environment: &app-env
     XDEBUG_MODE: ${XDEBUG_MODE:-off}
     DB_CONNECTION: pgsql
@@ -75,3 +83,4 @@ services:
 volumes:
   pgdata:
   redisdata:
+  vendor:
