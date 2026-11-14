@@ -1,10 +1,10 @@
 import { useState } from 'react'
-import { Link, useNavigate } from 'react-router-dom'
+import { Link, useNavigate, useSearchParams } from 'react-router-dom'
 import { Construction, Mail, Lock, Eye, EyeOff } from 'lucide-react'
 import { Button, Field, STATUS_ICON } from '../components/ui'
 import { useApp } from '../context/AppContext'
-import { login, register, forgotPassword } from '../services'
-import { HOME, PIPELINE, STEP_INFO } from '../constants'
+import { login, register, forgotPassword, resetPassword, USE_MOCK } from '../services'
+import { HOME, PIPELINE, STEP_INFO, STATUS_LABEL } from '../constants'
 
 function Shell({ title, sub, children }) {
   return (
@@ -13,8 +13,8 @@ function Shell({ title, sub, children }) {
         <div className="flex items-center gap-3"><div className="flex h-10 w-10 items-center justify-center rounded-ctl bg-brand-2 text-white"><Construction size={21} /></div><p className="text-lg font-bold tracking-tight">Lapor Infrastruktur</p></div>
         <div>
           <h2 className="max-w-md text-4xl font-bold leading-tight tracking-tight">Dari laporan warga sampai perbaikan terjadwal.</h2>
-          <p className="mt-4 max-w-md text-sm leading-7 text-white/65">Setiap laporan melewati lima tahap yang dapat Anda pantau kapan saja.</p>
-          <ol className="mt-10 max-w-md">{PIPELINE.map((s, i) => { const I = STATUS_ICON[s]; return <li key={s} className="relative flex gap-4 pb-6 last:pb-0">{i < PIPELINE.length - 1 && <span className="absolute left-[17px] top-10 -bottom-1 w-px bg-white/20" />}<span className="z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-2/20 text-brand-2 ring-1 ring-brand-2/40"><I size={16} /></span><div><p className="text-sm font-semibold">{s}</p><p className="text-[13px] leading-relaxed text-white/60">{STEP_INFO[s]}</p></div></li> })}</ol>
+          <p className="mt-4 max-w-md text-sm leading-7 text-white/65">Setiap laporan melewati tahapan yang dapat Anda pantau kapan saja.</p>
+          <ol className="mt-10 max-w-md">{PIPELINE.map((s, i) => { const I = STATUS_ICON[s]; return <li key={s} className="relative flex gap-4 pb-5 last:pb-0">{i < PIPELINE.length - 1 && <span className="absolute left-[17px] top-10 -bottom-1 w-px bg-white/20" />}<span className="z-10 flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-2/20 text-brand-2 ring-1 ring-brand-2/40"><I size={16} /></span><div><p className="text-sm font-semibold">{STATUS_LABEL[s]}</p><p className="text-[13px] leading-relaxed text-white/60">{STEP_INFO[s]}</p></div></li> })}</ol>
         </div>
         <p className="text-xs text-white/45">Layanan pelaporan kerusakan infrastruktur publik</p>
       </section>
@@ -39,7 +39,7 @@ export function Login() {
   const [busy, setBusy] = useState(false)
   const [show, setShow] = useState(false)
   const set = k => e => setF({ ...f, [k]: e.target.value })
-  const demo = import.meta.env.VITE_USE_MOCK !== 'false'
+  const demo = USE_MOCK
 
   const submit = async e => {
     e.preventDefault()
@@ -96,7 +96,12 @@ export function Register() {
       signIn(res)
       toast('Akun berhasil dibuat.')
       nav(HOME[res.user.role])
-    } catch (x) { setErr({ form: x.message }) } finally { setBusy(false) }
+    } catch (x) {
+      const taken = /taken|terdaftar/i.test(x.fields?.email || '')
+      setErr(x.fields?.email || x.fields?.name || x.fields?.password
+        ? { name: x.fields.name, email: taken ? 'Email sudah terdaftar.' : x.fields.email, password: x.fields.password }
+        : { form: x.message })
+    } finally { setBusy(false) }
   }
 
   return (
@@ -138,6 +143,50 @@ export function Forgot() {
         </form>
       )}
       <p className="mt-4 text-center text-sm"><Link to="/login" className="text-teal-700 hover:underline">Kembali ke halaman masuk</Link></p>
+    </Shell>
+  )
+}
+
+// Halaman tujuan tautan di email reset password: /reset-password?token=...&email=...
+export function Reset() {
+  const [q] = useSearchParams()
+  const { toast } = useApp()
+  const nav = useNavigate()
+  const token = q.get('token') || ''
+  const email = q.get('email') || ''
+  const [f, setF] = useState({ password: '', confirm: '' })
+  const [err, setErr] = useState({})
+  const [busy, setBusy] = useState(false)
+  const set = k => e => setF({ ...f, [k]: e.target.value })
+
+  const submit = async e => {
+    e.preventDefault()
+    const er = {}
+    if (f.password.length < 8) er.password = 'Password minimal 8 karakter.'
+    if (f.confirm !== f.password) er.confirm = 'Konfirmasi password tidak sama.'
+    setErr(er)
+    if (Object.keys(er).length) return
+    setBusy(true)
+    try {
+      await resetPassword({ token, email, ...f })
+      toast('Password berhasil diubah. Silakan masuk kembali.')
+      nav('/login')
+    } catch (x) { setErr({ form: x.status === 422 ? 'Tautan tidak valid atau sudah kedaluwarsa. Minta tautan baru.' : x.message }) } finally { setBusy(false) }
+  }
+
+  return (
+    <Shell title="Atur ulang password" sub={email ? `Buat password baru untuk ${email}` : 'Buat password baru untuk akun Anda'}>
+      {!token || !email ? (
+        <p role="alert" className="rounded-ctl bg-rose-50 p-3 text-sm font-medium text-rose-700">Tautan tidak lengkap. Buka tautan dari email Anda, atau minta tautan baru.</p>
+      ) : (
+        <form onSubmit={submit} className="space-y-4" noValidate>
+          {err.form && <p role="alert" className="rounded-ctl bg-rose-50 p-3 text-sm font-medium text-rose-700">{err.form}</p>}
+          <Field label="Password baru" icon={Lock} type="password" autoComplete="new-password" value={f.password} onChange={set('password')} error={err.password} />
+          <Field label="Konfirmasi password baru" icon={Lock} type="password" autoComplete="new-password" value={f.confirm} onChange={set('confirm')} error={err.confirm} />
+          <Button type="submit" loading={busy} className="w-full">Simpan password baru</Button>
+        </form>
+      )}
+      <p className="mt-4 text-center text-sm"><Link to="/forgot-password" className="font-semibold text-brand hover:underline">Minta tautan baru</Link> <span className="text-muted">atau</span> <Link to="/login" className="font-semibold text-brand hover:underline">kembali ke halaman masuk</Link></p>
     </Shell>
   )
 }

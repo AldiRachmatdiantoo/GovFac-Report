@@ -1,12 +1,14 @@
 import { Navigate, Outlet, Route, Routes } from 'react-router-dom'
+import { Loader2 } from 'lucide-react'
 import { useApp } from './context/AppContext'
 import Layout from './layouts/Layout'
-import { Login, Register, Forgot } from './pages/Auth'
+import { Login, Register, Forgot, Reset } from './pages/Auth'
 import { UserDashboard, ReportForm, MyReports, Community } from './pages/UserPages'
 import ReportDetail from './pages/ReportDetail'
 import { AdminDashboard, AdminReports } from './pages/AdminPages'
 import { GovDashboard, GovVerified, Schedules, AuditLog } from './pages/GovPages'
 import { HOME } from './constants'
+import { FEATURES } from './services'
 
 // Penjaga route: wajib login dan sesuai role
 const Guard = ({ role }) => {
@@ -21,7 +23,9 @@ const Public = () => {
 }
 
 export default function App() {
-  const { user } = useApp()
+  const { user, ready } = useApp()
+  // Tunggu pengecekan sesi selesai supaya pengguna yang masih login tidak sempat dilempar ke /login.
+  if (!ready) return <div className="flex min-h-screen items-center justify-center bg-canvas" role="status" aria-label="Memuat"><Loader2 className="h-7 w-7 animate-spin text-brand" /></div>
   return (
     <Routes>
       <Route element={<Public />}>
@@ -29,6 +33,8 @@ export default function App() {
         <Route path="/register" element={<Register />} />
         <Route path="/forgot-password" element={<Forgot />} />
       </Route>
+      {/* Tautan dari email reset password; tetap bisa dibuka walau sedang login di perangkat ini. */}
+      <Route path="/reset-password" element={<Reset />} />
 
       <Route path="/user" element={<Guard role="user" />}>
         <Route index element={<Navigate to="dashboard" replace />} />
@@ -36,7 +42,7 @@ export default function App() {
         <Route path="reports" element={<MyReports />} />
         <Route path="reports/create" element={<ReportForm />} />
         <Route path="reports/:id" element={<ReportDetail />} />
-        <Route path="reports/:id/edit" element={<ReportForm />} />
+        {FEATURES.editReport && <Route path="reports/:id/edit" element={<ReportForm />} />}
         <Route path="community" element={<Community />} />
       </Route>
 

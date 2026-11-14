@@ -40,7 +40,7 @@ Untuk build produksi:
 npm run build
 ```
 
-`.env` masih menggunakan `VITE_USE_MOCK=true`; data yang tampil tetap data dummy dari service layer. Jangan ubah ke mode API sebelum base URL dan kontrak API disepakati dengan anggota backend.
+Mode data diatur lewat `VITE_USE_MOCK` di `.env`; cara menyambung ke backend dijelaskan di [README.md](README.md).
 
 ## Catatan verifikasi
 Source JSX/JavaScript telah diperiksa untuk kesalahan sintaks. Build Vite belum dapat dijalankan di lingkungan penyusunan ini karena instalasi dependency npm tidak berhasil selesai (timeout). Jalankan `npm install` dan `npm run build` secara lokal untuk verifikasi akhir.

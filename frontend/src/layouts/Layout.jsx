@@ -1,9 +1,10 @@
 import { Fragment, useEffect, useState } from 'react'
 import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
-import { LayoutDashboard, FilePlus, FileText, Users, Inbox, BadgeCheck, CalendarClock, ScrollText, Bell, Menu, LogOut, Construction, X, ChevronRight } from 'lucide-react'
+import { LayoutDashboard, FilePlus, FileText, Users, Inbox, BadgeCheck, CalendarClock, ScrollText, Menu, LogOut, Construction, X, ChevronRight } from 'lucide-react'
 import { useApp } from '../context/AppContext'
 import { getReports } from '../services'
 import { cx } from '../components/ui'
+import NotificationBell from '../components/NotificationBell'
 import { ROLE_LABEL } from '../constants'
 
 const NAV = {
@@ -24,7 +25,7 @@ export default function Layout() {
 
   useEffect(() => {
     setOpen(false)
-    if (user.role === 'admin') getReports({ statuses: ['Menunggu'] }).then(r => setPending(r.length)).catch(() => {})
+    if (user.role === 'admin') getReports({ statuses: ['admin_review'] }).then(r => setPending(r.length)).catch(() => {})
   }, [pathname, user.role])
 
   // Breadcrumb kontekstual: halaman utama, atau "Menu induk > #id" untuk detail/edit
@@ -52,7 +53,7 @@ export default function Layout() {
         </nav>
         <div className="border-t border-line p-3">
           <div className="flex items-center gap-3 px-2 py-2"><Avatar name={user.name} /><div className="min-w-0"><p className="truncate text-[13px] font-semibold text-ink">{user.name}</p><p className="text-xs text-muted">{ROLE_LABEL[user.role]}</p></div></div>
-          <button onClick={() => { signOut(); nav('/login') }} className="flex w-full items-center gap-2.5 rounded-ctl px-3 py-2 text-[13px] font-semibold text-muted transition hover:bg-rose-50 hover:text-rose-600"><LogOut size={16} />Keluar</button>
+          <button onClick={async () => { await signOut(); nav('/login') }} className="flex w-full items-center gap-2.5 rounded-ctl px-3 py-2 text-[13px] font-semibold text-muted transition hover:bg-rose-50 hover:text-rose-600"><LogOut size={16} />Keluar</button>
         </div>
       </aside>
       <div className="min-w-0 flex-1">
@@ -64,7 +65,7 @@ export default function Layout() {
             </nav>
           </div>
           <div className="flex items-center gap-3">
-            {user.role === 'admin' && <button onClick={() => nav('/admin/reports')} className="relative rounded-ctl border border-line bg-white p-2 text-muted transition hover:text-brand" title="Laporan masuk terbaru" aria-label="Notifikasi laporan masuk"><Bell size={17} />{pending > 0 && <span className="absolute -right-1 -top-1 min-w-4 rounded-full bg-rose-500 px-1 text-center text-[10px] font-bold leading-4 text-white">{pending}</span>}</button>}
+            <NotificationBell />
             <Avatar name={user.name} cls="h-8 w-8" />
           </div>
         </header>

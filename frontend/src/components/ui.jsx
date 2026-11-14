@@ -1,15 +1,20 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Link } from 'react-router-dom'
-import { Loader2, X, Inbox, AlertTriangle, Search, MapPin, CalendarDays, Clock, Loader, ShieldCheck, BadgeCheck, CalendarCheck, XCircle, Ban, Check } from 'lucide-react'
-import { STATUS_STYLE, STATUS_HEX, PIPELINE } from '../constants'
+import { Loader2, X, Inbox, AlertTriangle, Search, MapPin, CalendarDays, Clock, Loader, ShieldCheck, BadgeCheck, CalendarCheck, XCircle, Ban, Check, Send, ChevronLeft, ChevronRight } from 'lucide-react'
+import { STATUS_STYLE, STATUS_HEX, STATUS_LABEL, PIPELINE } from '../constants'
 
 export const cx = (...a) => a.filter(Boolean).join(' ')
 
 export function useAsync(fn, deps = []) {
   const [s, set] = useState({ loading: true, data: null, error: null })
+  // Hanya jawaban dari permintaan terakhir yang dipakai; jawaban lama yang datang terlambat
+  // (misalnya setelah filter diganti) diabaikan agar tidak menimpa data yang lebih baru.
+  const seq = useRef(0)
   const run = useCallback(() => {
+    const id = ++seq.current
     set(p => ({ ...p, loading: true, error: null }))
-    fn().then(data => set({ loading: false, data, error: null })).catch(e => set({ loading: false, data: null, error: e.message }))
+    fn().then(data => { if (id === seq.current) set({ loading: false, data, error: null }) })
+      .catch(e => { if (id === seq.current) set({ loading: false, data: null, error: e.message }) })
   }, deps)
   useEffect(() => { run() }, [run])
   return { ...s, reload: run }
@@ -37,7 +42,7 @@ export function Modal({ open, title, onClose, children }) {
   if (!open) return null
   return <div className="anim-fade fixed inset-0 z-50 flex items-end justify-center bg-ink/50 backdrop-blur-sm sm:items-center sm:p-4" onClick={onClose}><div role="dialog" aria-modal="true" aria-label={title} className="anim-pop w-full max-w-md rounded-t-sheet bg-white p-5 shadow-pop sm:rounded-sheet sm:p-6" onClick={e => e.stopPropagation()}><div className="mb-4 flex items-center justify-between"><h3 className="text-base font-semibold text-ink">{title}</h3><button onClick={onClose} aria-label="Tutup" className="rounded-lg p-1.5 text-muted hover:bg-canvas"><X size={18} /></button></div>{children}</div></div>
 }
-export const StatusBadge = ({ status }) => { const I = STATUS_ICON[status] || Clock; return <span className={cx('inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold', STATUS_STYLE[status] || 'bg-slate-100 text-slate-600')}><I size={13} />{status}</span> }
+export const StatusBadge = ({ status }) => { const I = STATUS_ICON[status] || Clock; return <span className={cx('inline-flex shrink-0 items-center gap-1.5 rounded-full px-2.5 py-1 text-xs font-semibold', STATUS_STYLE[status] || 'bg-slate-100 text-slate-600')}><I size={13} />{STATUS_LABEL[status] || status}</span> }
 export const Card = ({ title, children, className }) => <section className={cx('rounded-card border border-line bg-white p-4 shadow-card sm:p-5', className)}>{title && <h2 className="mb-4 text-[15px] font-semibold text-ink">{title}</h2>}{children}</section>
 export const PageHeader = ({ title, sub, action }) => <div className="mb-6 flex flex-wrap items-end justify-between gap-4"><div><h1 className="text-[22px] font-bold tracking-tight text-ink sm:text-[28px]">{title}</h1>{sub && <p className="mt-1 max-w-2xl text-sm text-muted">{sub}</p>}</div>{action}</div>
 export const StatCard = ({ icon: I, label, value, alert }) => <div className="rounded-card border border-line bg-white p-4 shadow-card sm:p-5"><div className="flex items-center justify-between gap-2"><p className="text-[13px] font-medium text-muted">{label}</p><span className={cx('flex h-8 w-8 shrink-0 items-center justify-center rounded-ctl', alert ? 'bg-amber-50 text-amber-600' : 'bg-brand-50 text-brand')}><I size={16} /></span></div><p className="mt-3 text-[28px] font-bold leading-none tracking-tight text-ink">{value}</p></div>
@@ -49,12 +54,12 @@ export function Async({ state, children }) {
 }
 
 export function Filters({ q, setQ, status, setStatus, statuses }) {
-  return <div className="mb-4 flex flex-col gap-2.5 rounded-2xl border border-slate-100 bg-white p-3 shadow-[0_5px_20px_rgba(27,76,66,.025)] sm:flex-row"><div className="relative flex-1"><Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400"/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari judul laporan..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-[13px] outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"/></div>{setStatus && <select value={status} onChange={e => setStatus(e.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-[13px] font-medium text-slate-600"><option value="">Semua status</option>{(statuses || Object.keys(STATUS_STYLE)).map(s => <option key={s}>{s}</option>)}</select>}</div>
+  return <div className="mb-4 flex flex-col gap-2.5 rounded-2xl border border-slate-100 bg-white p-3 shadow-[0_5px_20px_rgba(27,76,66,.025)] sm:flex-row"><div className="relative flex-1"><Search className="absolute left-3.5 top-3 h-4 w-4 text-slate-400"/><input value={q} onChange={e => setQ(e.target.value)} placeholder="Cari judul laporan..." className="w-full rounded-xl border border-slate-200 bg-slate-50 py-2.5 pl-10 pr-3 text-[13px] outline-none focus:border-teal-400 focus:ring-2 focus:ring-teal-100"/></div>{setStatus && <select value={status} onChange={e => setStatus(e.target.value)} className="rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-[13px] font-medium text-slate-600"><option value="">Semua status</option>{(statuses || Object.keys(STATUS_LABEL)).map(s => <option key={s} value={s}>{STATUS_LABEL[s]}</option>)}</select>}</div>
 }
 
 export function ReportList({ items, base, showAuthor }) {
   if (!items.length) return <Empty text="Tidak ada laporan yang cocok." />
-  return <div className="overflow-hidden rounded-card border border-line bg-white shadow-card">{items.map((r, i) => <Link key={r.id} to={`${base}/${r.id}`} className={cx('group block px-4 py-3.5 transition hover:bg-brand-50/60 sm:px-5', i > 0 && 'border-t border-line')}><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-semibold text-ink group-hover:text-brand"><span className="mr-1.5 font-medium text-muted">#{r.id}</span>{r.title}</p><p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted"><span>{r.category}</span><span className="inline-flex items-center gap-1"><MapPin size={12} />{r.location}</span>{showAuthor && <span>{r.author}</span>}<span className="inline-flex items-center gap-1"><CalendarDays size={12} />{fmtDate(r.date)}</span></p></div><StatusBadge status={r.status} /></div><StatusPipeline report={r} mini /></Link>)}</div>
+  return <div className="overflow-hidden rounded-card border border-line bg-white shadow-card">{items.map((r, i) => <Link key={r.id} to={`${base}/${r.id}`} className={cx('group block px-4 py-3.5 transition hover:bg-brand-50/60 sm:px-5', i > 0 && 'border-t border-line')}><div className="flex items-start justify-between gap-3"><div className="min-w-0"><p className="truncate text-sm font-semibold text-ink group-hover:text-brand"><span className="mr-1.5 font-medium text-muted">{r.code || `#${r.id}`}</span>{r.title}</p><p className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-muted">{r.tags?.length > 0 && <span>{r.tags.map(t => `#${t}`).join(' ')}</span>}{r.location && <span className="inline-flex items-center gap-1"><MapPin size={12} />{r.location}</span>}{showAuthor && r.author && <span>{r.author}</span>}<span className="inline-flex items-center gap-1"><CalendarDays size={12} />{fmtDate(r.date)}</span></p></div><StatusBadge status={r.status} /></div><StatusPipeline report={r} mini /></Link>)}</div>
 }
 export function SignaturePad({ onChange }) {
   const ref = useRef(null)
@@ -67,8 +72,20 @@ export function SignaturePad({ onChange }) {
   return <div><canvas ref={ref} width={400} height={160} onPointerDown={start} onPointerMove={move} onPointerUp={end} onPointerLeave={end} className="w-full touch-none rounded-xl border border-dashed border-teal-200 bg-teal-50/30"/><button type="button" onClick={clear} className="mt-2 text-xs font-semibold text-teal-700 hover:underline">Hapus tanda tangan dan ulangi</button></div>
 }
 
-export const STATUS_ICON = { 'Menunggu': Clock, 'Diproses': Loader, 'Terverifikasi': ShieldCheck, 'Disetujui': BadgeCheck, 'Terjadwal': CalendarCheck, 'Ditolak AI': XCircle, 'Dibatalkan': Ban }
-export const fmtDate = d => new Date(d + 'T00:00:00').toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })
+export const STATUS_ICON = { ai_validation: Loader, admin_review: Clock, approved: ShieldCheck, forwarded: Send, gov_approved: BadgeCheck, scheduled: CalendarCheck, rejected: XCircle, cancelled: Ban }
+// Menerima tanggal saja (YYYY-MM-DD) maupun waktu ISO lengkap dari API.
+const toDate = d => new Date(d.length === 10 ? d + 'T00:00:00' : d)
+export const fmtDate = d => (d ? toDate(d).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' }) : '-')
+export const fmtDateTime = d => (d ? toDate(d).toLocaleString('id-ID', { day: 'numeric', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' }) : '-')
+
+export function Pager({ meta, onPage }) {
+  if (!meta || meta.lastPage <= 1) return null
+  return <nav aria-label="Halaman" className="mt-4 flex items-center justify-between gap-3 text-[13px] text-muted">
+    <Button variant="outline" disabled={meta.page <= 1} onClick={() => onPage(meta.page - 1)}><ChevronLeft size={15} />Sebelumnya</Button>
+    <span>Halaman <b className="text-ink">{meta.page}</b> dari {meta.lastPage} ({meta.total} laporan)</span>
+    <Button variant="outline" disabled={meta.page >= meta.lastPage} onClick={() => onPage(meta.page + 1)}>Berikutnya<ChevronRight size={15} /></Button>
+  </nav>
+}
 
 // Posisi laporan pada alur. mini = garis progres ringkas untuk daftar; tanpa mini = timeline vertikal untuk detail.
 export function StatusPipeline({ report: r, mini }) {
@@ -80,7 +97,7 @@ export function StatusPipeline({ report: r, mini }) {
     return <li key={s} className="relative flex gap-3 pb-5 last:pb-0">
       {i < PIPELINE.length - 1 && <span className={cx('absolute left-[11px] top-6 -bottom-1 w-0.5', done ? 'bg-brand' : 'bg-line')} />}
       <span className={cx('z-10 flex h-6 w-6 shrink-0 items-center justify-center rounded-full border-2 text-white', done || cur ? 'border-brand bg-brand' : 'border-line bg-white')}>{(done || cur) && <Check size={12} strokeWidth={3} />}</span>
-      <div className="pt-0.5"><p className={cx('text-sm font-semibold', i > idx ? 'text-muted' : 'text-ink')}>{s}</p>{at && <p className="text-xs text-muted">{at}</p>}</div>
+      <div className="pt-0.5"><p className={cx('text-sm font-semibold', i > idx ? 'text-muted' : 'text-ink')}>{STATUS_LABEL[s]}</p>{at && <p className="text-xs text-muted">{fmtDateTime(at)}</p>}</div>
     </li>
   })}</ol>
 }
@@ -96,13 +113,14 @@ export function StatusDonut({ by }) {
       <svg viewBox="0 0 100 100" className="h-full w-full -rotate-90" role="img" aria-label="Distribusi status laporan"><circle cx="50" cy="50" r={R} fill="none" stroke="#EEF4F2" strokeWidth="12" />{rows.map(k => { const len = (by[k] / total) * C; const el = <circle key={k} cx="50" cy="50" r={R} fill="none" stroke={STATUS_HEX[k]} strokeWidth="12" strokeDasharray={`${len} ${C - len}`} strokeDashoffset={-acc} />; acc += len; return el })}</svg>
       <div className="absolute inset-0 flex flex-col items-center justify-center"><span className="text-xl font-bold leading-none text-ink">{total}</span><span className="text-[11px] text-muted">laporan</span></div>
     </div>
-    <ul className="flex-1 space-y-2 text-[13px]">{rows.map(k => <li key={k} className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full" style={{ background: STATUS_HEX[k] }} /><span className="flex-1 text-muted">{k}</span><b className="tabular-nums text-ink">{by[k]}</b></li>)}</ul>
+    <ul className="flex-1 space-y-2 text-[13px]">{rows.map(k => <li key={k} className="flex items-center gap-2"><span className="h-2.5 w-2.5 rounded-full" style={{ background: STATUS_HEX[k] }} /><span className="flex-1 text-muted">{STATUS_LABEL[k]}</span><b className="tabular-nums text-ink">{by[k]}</b></li>)}</ul>
   </div>
 }
 
-export function CategoryBars({ items }) {
+export function TagBars({ items }) {
   const c = {}
-  items.forEach(r => { c[r.category] = (c[r.category] || 0) + 1 })
+  items.forEach(r => (r.tags || []).forEach(t => { c[`#${t}`] = (c[`#${t}`] || 0) + 1 }))
+  if (!Object.keys(c).length) return <p className="py-4 text-center text-sm text-muted">Belum ada data.</p>
   const max = Math.max(1, ...Object.values(c))
   return <div className="space-y-3">{Object.entries(c).sort((a, b) => b[1] - a[1]).map(([k, v]) => <div key={k} className="text-[13px]"><div className="mb-1 flex justify-between"><span className="text-muted">{k}</span><b className="tabular-nums text-ink">{v}</b></div><div className="h-2 rounded-full bg-canvas"><div className="h-2 rounded-full bg-brand" style={{ width: `${(v / max) * 100}%` }} /></div></div>)}</div>
 }

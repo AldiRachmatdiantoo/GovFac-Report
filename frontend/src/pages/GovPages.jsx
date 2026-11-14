@@ -14,14 +14,14 @@ export function GovDashboard() {
       <Async state={s}>{list => {
         const by = {}
         list.forEach(r => { by[r.status] = (by[r.status] || 0) + 1 })
-        const queue = list.filter(r => r.status === 'Terverifikasi')
+        const queue = list.filter(r => r.status === 'forwarded')
         const upcoming = list.filter(r => r.schedule).sort((a, b) => a.schedule.date.localeCompare(b.schedule.date))
         return (
           <div className="space-y-5">
             <div className="grid grid-cols-3 gap-3">
-              <StatCard icon={ShieldCheck} label="Menunggu persetujuan" value={by['Terverifikasi'] || 0} alert={!!by['Terverifikasi']} />
-              <StatCard icon={BadgeCheck} label="Disetujui" value={by['Disetujui'] || 0} />
-              <StatCard icon={CalendarCheck} label="Terjadwal" value={by['Terjadwal'] || 0} />
+              <StatCard icon={ShieldCheck} label="Menunggu persetujuan" value={by.forwarded || 0} alert={!!by.forwarded} />
+              <StatCard icon={BadgeCheck} label="Disetujui" value={by.gov_approved || 0} />
+              <StatCard icon={CalendarCheck} label="Terjadwal" value={by.scheduled || 0} />
             </div>
             <div className="grid gap-5 lg:grid-cols-[1fr_340px]">
               <div className="space-y-5">
@@ -50,7 +50,7 @@ export function GovDashboard() {
 }
 
 export function GovVerified() {
-  const s = useAsync(() => getReports({ statuses: ['Terverifikasi'] }), [])
+  const s = useAsync(() => getReports({ statuses: ['forwarded'] }), [])
   const [q, setQ] = useState('')
   return (
     <>
@@ -63,7 +63,7 @@ export function GovVerified() {
 
 export function Schedules() {
   const { user, toast } = useApp()
-  const s = useAsync(() => getReports({ statuses: ['Disetujui', 'Terjadwal'] }), [])
+  const s = useAsync(() => getReports({ statuses: ['gov_approved', 'scheduled'] }), [])
   const [m, setM] = useState(null)
   const [date, setDate] = useState('')
   const [note, setNote] = useState('')
@@ -75,7 +75,7 @@ export function Schedules() {
     if (!note.trim()) return toast(m.schedule ? 'Alasan perubahan wajib diisi.' : 'Catatan pekerjaan wajib diisi.', 'error')
     setBusy(true)
     try {
-      await updateReport(m.id, { status: 'Terjadwal', schedule: { date, note } },
+      await updateReport(m.id, { status: 'scheduled', schedule: { date, note } },
         m.schedule ? `Jadwal diubah ke ${date}. Alasan: ${note}` : `Pekerjaan dijadwalkan pada ${date}. Catatan: ${note}`, user)
       toast('Jadwal tersimpan.'); setM(null); s.reload()
     } catch (e) { toast(e.message, 'error') } finally { setBusy(false) }
