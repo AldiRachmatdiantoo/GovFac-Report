@@ -1,6 +1,6 @@
 # Sprint 1 — Panduan Pengerjaan Backend
 
-Periode: 3–17 November 2026. Acuan utama: [PRD Backend GovFac-Report](../PRD.md) (API contract, ERD, transisi status).
+Periode: 3–17 November 2026. Acuan utama: [PRD Backend GovFac-Report](../../../README.md#prd-backend) (API contract, ERD, transisi status).
 
 ## Pembagian
 
