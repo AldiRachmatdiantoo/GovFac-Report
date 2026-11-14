@@ -2,6 +2,8 @@
 
 API pelaporan kerusakan fasilitas umum. Laravel 13, modular monolith (layered + module based), PostgreSQL, Redis, Docker multi-stage.
 
+Acuan produk: [PRD Backend](docs/PRD.md), berisi user flow, ERD, API contract, dan transisi status.
+
 ## Menjalankan dengan Docker
 
 Semua perintah dijalankan dari folder `backend/`.

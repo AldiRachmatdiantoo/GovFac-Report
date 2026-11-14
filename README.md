@@ -30,4 +30,11 @@ npm install
 npm run dev
 ```
 
-Aturan kerja tim backend ada di [backend/docs/ATURAN-TIM.md](backend/docs/ATURAN-TIM.md).
+## Dokumen
+
+| Dokumen | Isi |
+| --- | --- |
+| [PRD Backend](backend/docs/PRD.md) | Lingkup, peran, [user flow](backend/docs/PRD.md#user-flow-per-peran), [ERD](backend/docs/PRD.md#model-data-erd), [API contract](backend/docs/PRD.md#api-contract), transisi status |
+| [Aturan tim backend](backend/docs/ATURAN-TIM.md) | Pembagian berkas, arsitektur, dan alur kerja PR |
+| [Panduan Sprint 1](backend/docs/sprint-1/README.md) | Pembagian PBI per developer |
+| [Sambungan frontend ke API](frontend/README.md#sambungan-ke-backend) | Fitur mana yang sudah memakai API asli |
