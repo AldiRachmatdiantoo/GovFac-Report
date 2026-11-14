@@ -33,11 +33,13 @@ API tersedia di `http://localhost:8000/api/v1`. Cek kesehatan: `http://localhost
 
 | Layanan | Fungsi |
 | --- | --- |
-| `app` | PHP-FPM (stage `dev`), kode di-mount sebagai volume |
+| `app` | PHP-FPM (stage `dev`), kode di-mount sebagai volume; `vendor/` di volume Docker tersendiri |
 | `queue` | Worker antrean dari image yang sama |
 | `nginx` | Web server, port `8000` |
 | `postgres` | PostgreSQL 16, port `5432` |
 | `redis` | Cache, antrean, sesi |
+
+`vendor/` kontainer disimpan di volume Docker `vendor` supaya cepat, jadi terpisah dari `vendor/` di folder proyek. Setelah `composer.lock` berubah (atau setelah volume dihapus), jalankan lagi `docker compose exec app composer install`. Bila `docker/php/dev.ini` berubah, bangun ulang image dengan `docker compose up -d --build`.
 
 Image produksi: `docker build --target production -t govfac-report:prod .`
 
