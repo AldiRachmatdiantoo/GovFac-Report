@@ -1,10 +1,18 @@
-# GovFac-Report — Backend
+# GovFac-Report
 
-API pelaporan kerusakan fasilitas umum. Laravel 13, modular monolith (layered + module based), PostgreSQL, Redis, Docker multi-stage.
+Aplikasi pelaporan kerusakan fasilitas umum.
 
-## Menjalankan dengan Docker
+| Folder | Isi | Panduan |
+| --- | --- | --- |
+| [`backend/`](backend) | API Laravel 13 (modular monolith), PostgreSQL, Redis, Docker | [backend/README.md](backend/README.md) |
+| [`frontend/`](frontend) | Aplikasi web React + Vite + Tailwind | [frontend/README.md](frontend/README.md) |
+
+## Menjalankan keduanya
+
+Backend (API di `http://localhost:8000/api/v1`):
 
 ```bash
+cd backend
 cp .env.example .env
 docker compose up -d --build
 docker compose exec app composer install
@@ -13,75 +21,13 @@ docker compose exec app php artisan jwt:secret
 docker compose exec app php artisan migrate
 ```
 
-## Autentikasi
-
-Sesi memakai JWT di cookie httpOnly; frontend tidak pernah memegang token.
-
-- `POST /auth/login` memasang cookie `access_token` (httpOnly) dan `XSRF-TOKEN` (bisa dibaca JavaScript).
-- Frontend mengirim setiap permintaan dengan `credentials: 'include'`.
-- Permintaan selain GET wajib membawa header `X-XSRF-TOKEN` berisi nilai cookie `XSRF-TOKEN`; tanpa itu dijawab `419`.
-- Access token berlaku 15 menit. Saat mendapat `401`, panggil `POST /auth/refresh` lalu ulangi permintaan. Sesi bisa diperpanjang sampai 7 hari sejak login.
-- Mengganti password mencabut semua sesi lama.
-- Origin frontend diatur lewat `FRONTEND_URL` di `.env` (dipakai CORS dan tautan email).
-
-Di route modul, pakai `->middleware('auth:api')` dan `->middleware('role:admin')`. Di tes, pakai `$this->actingAs($user, 'api')`.
-
-API tersedia di `http://localhost:8000/api/v1`. Cek kesehatan: `http://localhost:8000/up`.
-
-| Layanan | Fungsi |
-| --- | --- |
-| `app` | PHP-FPM (stage `dev`), kode di-mount sebagai volume |
-| `queue` | Worker antrean dari image yang sama |
-| `nginx` | Web server, port `8000` |
-| `postgres` | PostgreSQL 16, port `5432` |
-| `redis` | Cache, antrean, sesi |
-
-Image produksi: `docker build --target production -t govfac-report:prod .`
-
-## Struktur modul
-
-Setiap modul berada di `app/Modules/<Nama>` dan memakai lapisan yang sama:
-
-```
-Http/Controllers   menerima request, memanggil Service, mengembalikan Resource
-Http/Requests      FormRequest: validasi dan otorisasi input
-Http/Resources     bentuk JSON keluaran
-Services           aturan bisnis dan transaksi
-Repositories       seluruh query Eloquent
-Models             model Eloquent dan relasi
-Policies           hak akses per objek
-Events, Listeners, Jobs
-Contracts          interface yang boleh dipakai modul lain
-Database           Migrations, Factories, Seeders
-Routes/api.php     otomatis di bawah /api/v1
-Tests              Feature dan Unit
-Providers          <Nama>ServiceProvider
-```
-
-| Modul | PBI |
-| --- | --- |
-| Auth | 1, 2 |
-| Notification | 3, 14 |
-| Report | 5, 7, 8, 9, 10 |
-| AiValidation | 6 |
-| Community | 11, 12 |
-| Verification | 15, 16, 17 |
-| Government | 18–22 |
-| Analytics | 4, 13 |
-| Shared | kode bersama |
-
-## Aturan
-
-- Arah panggilan: Controller → Service → Repository → Model.
-- Modul lain hanya boleh memakai interface di `Contracts/` atau mendengarkan event.
-- Binding `Contracts` didaftarkan di properti `$contracts` pada ServiceProvider modul.
-- Route dan migration modul dimuat otomatis oleh `Shared/Providers/ModuleServiceProvider`.
-- Status laporan hanya berubah lewat `ReportStatusService` di modul Report.
-
-## Tes
+Frontend (web di `http://localhost:5173`):
 
 ```bash
-docker compose exec app php artisan test
+cd frontend
+cp .env.example .env
+npm install
+npm run dev
 ```
 
-Tes modul diletakkan di `app/Modules/<Nama>/Tests` dan ikut berjalan lewat test suite `Modules`.
+Aturan kerja tim backend ada di [backend/docs/ATURAN-TIM.md](backend/docs/ATURAN-TIM.md).

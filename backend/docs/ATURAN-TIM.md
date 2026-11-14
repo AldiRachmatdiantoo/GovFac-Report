@@ -2,6 +2,8 @@
 
 Berlaku untuk semua developer dan semua agen AI (Claude, Codex, dan lainnya) yang bekerja di repositori ini.
 
+Repositori berisi dua folder: `backend/` (API Laravel, dokumen ini) dan `frontend/` (React, milik tim frontend). **Semua path di dokumen ini relatif terhadap `backend/`**, dan semua perintah dijalankan dari folder `backend/`. Developer backend tidak mengubah isi `frontend/`, dan sebaliknya, kecuali disepakati.
+
 ## Sebelum mulai
 
 1. Pastikan Anda tahu sedang bekerja sebagai Dev A, B, C, atau D. Agen AI: bila belum jelas, **tanyakan dulu**.
@@ -50,6 +52,7 @@ Controller  ->  Service  ->  Repository  ->  Model
 Semua perintah dijalankan di dalam kontainer, bukan langsung di mesin:
 
 ```bash
+cd backend
 docker compose up -d
 docker compose exec app php artisan migrate
 docker compose exec app php artisan test

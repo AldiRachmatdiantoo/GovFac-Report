@@ -1,4 +1,8 @@
-# Lingkungan pengembangan lokal. Jalankan: docker compose up -d
+# Lingkungan pengembangan lokal. Jalankan dari folder backend/: docker compose up -d
+# `name` dikunci supaya nama kontainer dan volume (pgdata, redisdata) tidak ikut
+# berubah menjadi "backend" setelah berkas ini pindah ke folder backend/.
+name: govfac-report
+
 x-app: &app
   build:
     context: .
