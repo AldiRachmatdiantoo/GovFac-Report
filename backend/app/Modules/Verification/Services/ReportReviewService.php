@@ -6,10 +6,13 @@ use App\Modules\AiValidation\Contracts\AiValidationReader;
 use App\Modules\Auth\Models\User;
 use App\Modules\Report\Contracts\ReportReview;
 use App\Modules\Report\Contracts\ReportStatusService;
+use App\Modules\Report\Contracts\ReviewDecisionFilter;
 use App\Modules\Report\Models\Report;
+use App\Modules\Report\Models\ReportStatusHistory;
 use App\Modules\Shared\Enums\ReasonCategory;
 use App\Modules\Shared\Enums\ReportStatus;
 use App\Modules\Shared\Exceptions\InvalidStatusTransition;
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 
 class ReportReviewService
@@ -19,6 +22,25 @@ class ReportReviewService
         private readonly ReportStatusService $statuses,
         private readonly AiValidationReader $aiValidations,
     ) {}
+
+    /**
+     * The active queue. There is no manual move: a decision takes the report out of
+     * `admin_review`, so it leaves the queue and enters the history on the next request.
+     *
+     * @return LengthAwarePaginator<int, Report>
+     */
+    public function queue(int $perPage): LengthAwarePaginator
+    {
+        return $this->reports->paginateAwaitingReview($perPage);
+    }
+
+    /**
+     * @return LengthAwarePaginator<int, ReportStatusHistory>
+     */
+    public function history(ReviewDecisionFilter $filter): LengthAwarePaginator
+    {
+        return $this->reports->paginateDecisions($filter);
+    }
 
     /**
      * @throws ModelNotFoundException
