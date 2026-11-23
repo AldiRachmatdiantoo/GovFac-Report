@@ -44,6 +44,11 @@ class ReportPolicy
         return $this->ownerOnly($user, $report);
     }
 
+    public function cancel(User $user, Report $report): Response
+    {
+        return $this->ownerOnly($user, $report);
+    }
+
     /**
      * Someone who may see the report but doesn't own it gets 403; everyone else gets 404, as in view().
      */
