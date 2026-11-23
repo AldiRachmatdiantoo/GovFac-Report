@@ -4,7 +4,10 @@ namespace App\Modules\Notification\Services;
 
 use App\Modules\Auth\Events\UserLoggedIn;
 use App\Modules\Notification\Notifications\LoginDetected;
+use App\Modules\Notification\Notifications\ReportDecided;
 use App\Modules\Notification\Repositories\NotificationRepository;
+use App\Modules\Report\Events\ReportStatusChanged;
+use App\Modules\Shared\Enums\ReportStatus;
 use App\Modules\Shared\Support\Pagination;
 use Illuminate\Auth\AuthManager;
 use Illuminate\Contracts\Pagination\LengthAwarePaginator;
@@ -32,6 +35,28 @@ class NotificationService
         }
 
         $user->notify(new LoginDetected($event->ip, $event->userAgent, $event->loggedInAt));
+    }
+
+    /**
+     * Approvals and rejections reach the reporter; other status changes do not.
+     */
+    public function notifyReportDecision(ReportStatusChanged $event): void
+    {
+        if (! in_array($event->toStatus, [ReportStatus::Approved, ReportStatus::Rejected], true)) {
+            return;
+        }
+
+        $report = $event->report;
+
+        $report->reporter?->notify(new ReportDecided(
+            reportId: $report->getKey(),
+            reportCode: $report->code,
+            reportTitle: $report->title,
+            decision: $event->toStatus,
+            decidedBySystem: $event->actor === null,
+            reasonCategory: $event->reasonCategory,
+            note: $event->note,
+        ));
     }
 
     /**
