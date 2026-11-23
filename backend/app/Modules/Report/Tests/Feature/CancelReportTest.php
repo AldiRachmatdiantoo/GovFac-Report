@@ -108,8 +108,14 @@ class CancelReportTest extends TestCase
 
         $this->postJson("/api/v1/reports/{$report->id}/cancel")->assertUnauthorized();
 
+        // A report in the community feed is visible to other users, so they get 403 rather than 404.
         $this->actingAs(User::factory()->create(), 'api')
-            ->postJson("/api/v1/reports/{$report->id}/cancel")->assertNotFound();
+            ->postJson("/api/v1/reports/{$report->id}/cancel")->assertForbidden();
+
+        $hidden = $this->report(ReportStatus::AiValidation);
+        $this->actingAs(User::factory()->create(), 'api')
+            ->postJson("/api/v1/reports/{$hidden->id}/cancel")->assertNotFound();
+        $this->assertSame(ReportStatus::AiValidation, $hidden->fresh()->status);
 
         $this->actingAs(User::factory()->government()->create(), 'api')
             ->postJson("/api/v1/reports/{$report->id}/cancel")->assertForbidden();

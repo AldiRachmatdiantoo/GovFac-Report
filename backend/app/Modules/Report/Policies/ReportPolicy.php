@@ -3,6 +3,7 @@
 namespace App\Modules\Report\Policies;
 
 use App\Modules\Auth\Models\User;
+use App\Modules\Report\Contracts\ReportFeed;
 use App\Modules\Report\Models\Report;
 use App\Modules\Shared\Enums\ReportStatus;
 use App\Modules\Shared\Enums\UserRole;
@@ -32,8 +33,8 @@ class ReportPolicy
         $allowed = match ($user->role) {
             UserRole::Admin => true,
             UserRole::Government => in_array($report->status, self::GOVERNMENT_VISIBLE, true),
-            // User lain belum boleh melihat laporan orang lain; feed publik baru ada di PBI-11.
-            default => false,
+            // User lain hanya melihat laporan yang tampil di feed komunitas (PBI-11).
+            default => in_array($report->status, ReportFeed::VISIBLE_STATUSES, true),
         };
 
         return $allowed ? Response::allow() : Response::denyAsNotFound();
