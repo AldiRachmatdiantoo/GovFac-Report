@@ -1,5 +1,6 @@
 <?php
 
+use App\Modules\Report\Http\Controllers\CancelReportController;
 use App\Modules\Report\Http\Controllers\CreateReportController;
 use App\Modules\Report\Http\Controllers\MyReportsController;
 use App\Modules\Report\Http\Controllers\ReportHistoryController;
@@ -29,4 +30,9 @@ Route::middleware('auth:api')->group(function () {
 // PBI-8
 Route::middleware(['auth:api', 'role:user'])->group(function (): void {
     Route::put('reports/{id}', UpdateReportController::class)->whereNumber('id')->name('reports.update');
+});
+
+// PBI-9
+Route::middleware(['auth:api', 'role:user'])->group(function (): void {
+    Route::post('reports/{id}/cancel', CancelReportController::class)->whereNumber('id')->name('reports.cancel');
 });
