@@ -2,8 +2,10 @@
 
 namespace App\Modules\AiValidation\Providers;
 
+use App\Modules\AiValidation\Contracts\AiValidationReader;
 use App\Modules\AiValidation\Contracts\AiValidator;
 use App\Modules\AiValidation\Listeners\QueueReportValidation;
+use App\Modules\AiValidation\Services\EloquentAiValidationReader;
 use App\Modules\AiValidation\Services\RuleBasedAiValidator;
 use App\Modules\Report\Events\ReportSubmitted;
 use App\Modules\Shared\Providers\ModuleServiceProvider;
@@ -18,6 +20,7 @@ class AiValidationServiceProvider extends ModuleServiceProvider
      */
     protected array $contracts = [
         AiValidator::class => RuleBasedAiValidator::class,
+        AiValidationReader::class => EloquentAiValidationReader::class,
     ];
 
     public function boot(): void
