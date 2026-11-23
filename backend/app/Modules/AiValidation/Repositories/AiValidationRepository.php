@@ -20,4 +20,12 @@ class AiValidationRepository
             'model' => $result->model,
         ]);
     }
+
+    public function latestForReport(int $reportId): ?AiValidation
+    {
+        return AiValidation::query()
+            ->where('report_id', $reportId)
+            ->orderByDesc('revision')
+            ->first();
+    }
 }

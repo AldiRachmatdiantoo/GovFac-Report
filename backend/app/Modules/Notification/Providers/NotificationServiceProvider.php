@@ -3,7 +3,10 @@
 namespace App\Modules\Notification\Providers;
 
 use App\Modules\Auth\Events\UserLoggedIn;
+use App\Modules\Notification\Listeners\NotifyAdminsOfReportAwaitingReview;
+use App\Modules\Notification\Listeners\NotifyReporterOfDecision;
 use App\Modules\Notification\Listeners\SendLoginNotification;
+use App\Modules\Report\Events\ReportStatusChanged;
 use App\Modules\Shared\Providers\ModuleServiceProvider;
 use Illuminate\Support\Facades\Event;
 
@@ -21,5 +24,7 @@ class NotificationServiceProvider extends ModuleServiceProvider
         parent::boot();
 
         Event::listen(UserLoggedIn::class, SendLoginNotification::class);
+        Event::listen(ReportStatusChanged::class, NotifyReporterOfDecision::class);
+        Event::listen(ReportStatusChanged::class, NotifyAdminsOfReportAwaitingReview::class);
     }
 }
