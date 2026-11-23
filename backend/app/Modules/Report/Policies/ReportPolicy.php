@@ -38,4 +38,21 @@ class ReportPolicy
 
         return $allowed ? Response::allow() : Response::denyAsNotFound();
     }
+
+    public function update(User $user, Report $report): Response
+    {
+        return $this->ownerOnly($user, $report);
+    }
+
+    /**
+     * Someone who may see the report but doesn't own it gets 403; everyone else gets 404, as in view().
+     */
+    private function ownerOnly(User $user, Report $report): Response
+    {
+        if ($user->getKey() === $report->reporter_id) {
+            return Response::allow();
+        }
+
+        return $this->view($user, $report)->allowed() ? Response::deny() : Response::denyAsNotFound();
+    }
 }
