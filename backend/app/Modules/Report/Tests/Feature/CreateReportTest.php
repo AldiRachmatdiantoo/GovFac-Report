@@ -12,6 +12,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\Storage;
 use PHPUnit\Framework\Attributes\DataProvider;
 use RuntimeException;
@@ -26,6 +27,8 @@ class CreateReportTest extends TestCase
         parent::setUp();
         config(['filesystems.default' => 'public']);
         Storage::fake('public');
+        // Submitting queues the AI validation (PBI-6); here we only care about creating the report.
+        Queue::fake();
     }
 
     private function photo(string $name = 'original.png'): UploadedFile
