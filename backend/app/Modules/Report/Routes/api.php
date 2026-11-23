@@ -5,6 +5,7 @@ use App\Modules\Report\Http\Controllers\MyReportsController;
 use App\Modules\Report\Http\Controllers\ReportHistoryController;
 use App\Modules\Report\Http\Controllers\ShowReportController;
 use App\Modules\Report\Http\Controllers\TagController;
+use App\Modules\Report\Http\Controllers\UpdateReportController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -23,4 +24,9 @@ Route::middleware('auth:api')->group(function () {
     Route::get('/reports/mine', [MyReportsController::class, 'index']);
     Route::get('/reports/{id}/history', [ReportHistoryController::class, 'show'])->whereNumber('id');
     Route::get('/reports/{id}', [ShowReportController::class, 'show'])->whereNumber('id');
+});
+
+// PBI-8
+Route::middleware(['auth:api', 'role:user'])->group(function (): void {
+    Route::put('reports/{id}', UpdateReportController::class)->whereNumber('id')->name('reports.update');
 });
