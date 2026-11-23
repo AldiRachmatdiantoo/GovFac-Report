@@ -50,6 +50,14 @@ class ReportPolicy
     }
 
     /**
+     * Admin and government get whatever view() lets them see; citizens only their own reports.
+     */
+    public function downloadPdf(User $user, Report $report): Response
+    {
+        return $user->role === UserRole::User ? $this->ownerOnly($user, $report) : $this->view($user, $report);
+    }
+
+    /**
      * Someone who may see the report but doesn't own it gets 403; everyone else gets 404, as in view().
      */
     private function ownerOnly(User $user, Report $report): Response

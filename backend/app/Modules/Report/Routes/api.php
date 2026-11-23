@@ -2,6 +2,7 @@
 
 use App\Modules\Report\Http\Controllers\CancelReportController;
 use App\Modules\Report\Http\Controllers\CreateReportController;
+use App\Modules\Report\Http\Controllers\DownloadReportPdfController;
 use App\Modules\Report\Http\Controllers\MyReportsController;
 use App\Modules\Report\Http\Controllers\ReportHistoryController;
 use App\Modules\Report\Http\Controllers\ShowReportController;
@@ -35,4 +36,9 @@ Route::middleware(['auth:api', 'role:user'])->group(function (): void {
 // PBI-9
 Route::middleware(['auth:api', 'role:user'])->group(function (): void {
     Route::post('reports/{id}/cancel', CancelReportController::class)->whereNumber('id')->name('reports.cancel');
+});
+
+// PBI-10
+Route::middleware('auth:api')->group(function (): void {
+    Route::get('reports/{id}/pdf', DownloadReportPdfController::class)->whereNumber('id')->name('reports.pdf');
 });
