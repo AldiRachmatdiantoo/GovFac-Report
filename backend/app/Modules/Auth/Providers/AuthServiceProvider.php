@@ -2,6 +2,8 @@
 
 namespace App\Modules\Auth\Providers;
 
+use App\Modules\Auth\Contracts\UserDirectory;
+use App\Modules\Auth\Services\EloquentUserDirectory;
 use App\Modules\Shared\Providers\ModuleServiceProvider;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
@@ -14,7 +16,9 @@ class AuthServiceProvider extends ModuleServiceProvider
      *
      * @var array<class-string, class-string>
      */
-    protected array $contracts = [];
+    protected array $contracts = [
+        UserDirectory::class => EloquentUserDirectory::class,
+    ];
 
     /**
      * Endpoint publik yang rawan disalahgunakan. Tiap endpoint punya jatah
